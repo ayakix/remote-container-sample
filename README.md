@@ -5,7 +5,7 @@ VSCode remote containersを使ってホスト側の環境を汚すことなく�
 その際に、extensionでLintツールをインストールしたり、VSCodeの設定も行います。これは開発メンバー間で同一の環境を作成することを想定しています。
 
 ## VSCode remote containersとは？
-開発環境をDockerコンテナ側に作成し、ホスト側のディレクトリをマウントすることで、開発者はホスト側のVSCode上で編集することで、コンテナ側のファイルを書き換えることができる機能(extension)です。
+Dockerコンテナに開発環境を構築し、ホスト側のディレクトリをマウントすることで、開発者がホスト側のVSCode上でコンテナ側のファイルを書き換えることができる機能(extension)です。
 
 ![image](https://code.visualstudio.com/assets/docs/remote/containers/architecture-containers.png)
 [VSCodeドキュメントより](https://code.visualstudio.com/docs/remote/containers)より
@@ -16,8 +16,10 @@ VSCode remote containersを使ってホスト側の環境を汚すことなく�
 1. リポジトリクローン `git clone git@github.com:ayakix/remote-container-sample.git`
 1. VSCode上より「Open Folder」 にて、ディレクトリを開く
 1. コマンドパレットもしくは左下の`><`ボタンから`Reopen in Container`を開く
-2. コンテナが起動し、必要ライブラリインストール後に本日の日付が表示されたら正しくコンテナが起動できています。
-3. 起動した状態で、test.jsを編集し、例えば、`const now = dayjs();`を`const now=dayjs();`のように編集し、保存してください。コードが自動フォーマットされます。
+![extension_button](https://raw.githubusercontent.com/ayakix/remote-container-sample/main/images/extension_button.png)
+![command](https://raw.githubusercontent.com/ayakix/remote-container-sample/main/images/command.png)
+1. コンテナが起動し、必要ライブラリインストール後に本日の日付が表示されたら正しくコンテナが起動できています。
+2. 起動した状態で、test.jsを編集し、例えば、`const now = dayjs();`を`const now=dayjs();`のように編集し、保存してください。コードが自動フォーマットされます。
 
 ## 説明
 ### ファイル構成
@@ -41,11 +43,14 @@ version: "3"
 services:
   myservice:
     image: mcr.microsoft.com/vscode/devcontainers/javascript-node:0-14
+    # working_dirディレクトリ下にホストのディレクトリをマウントします
     working_dir: /workspace
     volumes:
+      # node_modulesディレクトリはホスト側に渡さないようにDockerのvolume内に格納します
       - node-modules:/workspace/node_modules
       - .:/workspace:cached
-    tty: true # コンテナを起動させ続ける
+    # コンテナを起動させ続ける
+    tty: true
 
 volumes:
   node-modules:
@@ -84,7 +89,7 @@ imageにはmicrosoftのjavascript-node14を使用します。
 }
 ```
 docker-composeへのパス、VSCodeの設定やextensionを記述します。
-また、postCreateCommandはコンテナ作成時に一度実行されるもの、postStartCommandはコンテナ起動時に毎回呼ばれるものです。直接コマンドを記述できますが、複数コマンドあると見づらいので、別途shellファイルで管理しています。
+また、postCreateCommandはコンテナ作成時に一度実行されるもの、postStartCommandはコンテナ起動時に毎回呼ばれるものです。直接コマンドを記述できますが、コマンドが複数あると見づらいので、別途shellファイルで管理しています。
 
 ### postCreateCommand.sh
 ```postCreateCommand.sh
