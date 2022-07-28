@@ -109,3 +109,34 @@ VSCodeのDocker extensionをインストールすると、VSCode上でコンテ�
 docker kill [container_id]
 docker rm [container_id]
 ```
+---
+VSCodeのLiveShare extensionをインストールしておくことで、ペアプロの導入が進みます。
+.devcontainer/devcontainer.json内に
+```.devcontainer/devcontainer.json
+  "extensions": [
+    ...
+    "ms-vsliveshare.vsliveshare"
+  ],
+```
+
+.devcontainer/postCreateCommand.sh内に
+```.devcontainer/postCreateCommand.sh
+...
+
+# live share dependencies
+# via: https://docs.microsoft.com/en-us/visualstudio/liveshare/reference/linux#debian--ubuntu
+apt-get update && apt-get install -y \
+  libssl1.1 \
+  libkrb5-3 \
+  zlib1g \
+  libicu[0-9][0-9] \
+  gnome-keyring \
+  libsecret-1-0 \
+  desktop-file-utils \
+  x11-utils \
+&& apt-get clean \
+&& rm -rf /var/lib/apt/lists/*
+```
+
+を追記することで、導入できます。
+相手にターミナルを共有した場合でもコンテナ側のターミナルとなるので、安心です。
